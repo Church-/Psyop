@@ -1,0 +1,12 @@
+[package]
+name = "psyop"
+version = "0.1.0"
+authors = ["noah"]
+
+[dependencies]
+libc = "0.2.36"
+regex = "0.2"
+
+[[bin]]
+name = "lib"
+path = "src/run.rs" 
