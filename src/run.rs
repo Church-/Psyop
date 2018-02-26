@@ -2,13 +2,13 @@ extern crate regex;
 mod process;
 use std::str::Lines;
 use regex::Regex;
-use std::path::Path;
+use std::path::{Path,PathBuf};
 use std::collections::BTreeMap;
 use std::fs::File;
 use process::Process;
 
 
-fn readFile(filePath: String)  -> Lines {
+fn readFile(filePath: String)  -> Lines<'a> {
 	let tmpFile = File::open(filePath);
 	let contents = String::new();
 	tmpFile.read_to_string(&mut contents);
@@ -47,7 +47,7 @@ fn getSystemMemory() {
 		for i in meminfo {
 			let (first,second) = splitOnce(i, ":"); 
 			match first {
-				"name" => (systemMem,) = splitOnce(first, "kB") 
+				"name" => (systemMem,) = splitOnce(first, "kB"),
 				_ => continue
 			}
 		}
@@ -64,10 +64,7 @@ fn printStatusMap(processMap: BTreeMap<isize,Process>) {
 	println!("{}",tmpString);
 }
 
-fn parseProce() -> Vec<String> {}
-
-fn run() {
-	let mut processMap: BTreeMap<isize,Process> = BTreeMap::new();
+fn parseProc() -> Vec<String> {
 	let path = Path::new("/proc");
 	let mut folders: Vec<String> = Vec::new();
 	let re = Regex::new(r"^\d+$");
@@ -75,15 +72,19 @@ fn run() {
 	for entry in path.read_dir().expect("Failed to read folder contents.") {
 		if let Ok(entry) = entry {
 		        tmpPath = entry.path().to_str();
-		    }
+			}
 		match re.is_match(tmpPath) {
 			true => folders.push(tmpPath),
 			false => continue,
 		}
-	}
+	}	
+	folders
+}
 
-	for i in folders {
-		let mut mutPath = path.to_path_buf();
+fn run() {
+	let mut processMap: BTreeMap<isize,Process> = BTreeMap::new();
+	for i in parseProc() {
+		let mut mutPath = PathBuf::new("/proc");
 		mutPath.push(i);
 		match mutPath.is_dir() {
 			true => {
